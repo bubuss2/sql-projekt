@@ -111,6 +111,13 @@ CREATE VIEW [Aktualne Zastepstwa] AS
 	JOIN Nauczyciele ON Zajecia.Nauczyciel = Nauczyciele.Id
 	WHERE [Data zakonczenia] > GETDATE()
 ```
+```sql
+CREATE VIEW [Ilosc czlonkow kol] AS
+    SELECT [Kola naukowe].Nazwa, Count(Id_ucznia) AS [Ilosc czlonkow] FROM [Czlonkowie kol]
+    JOIN [Kola naukowe] ON [Czlonkowie kol].[Nazwa_kola] = [Kola naukowe].Nazwa
+    GROUP BY [Kola naukowe].Nazwa
+    ORDER BY [Ilosc czlonkow] DESC OFFSET 0 ROWS
+```
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
 ```sql
