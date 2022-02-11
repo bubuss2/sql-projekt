@@ -86,6 +86,30 @@ CREATE VIEW [Zarządy Klas] AS
 	JOIN [Zarzad klas] ON Osoby.Id = [Zarzad klas].Id_ucznia
 	JOIN Uczniowie ON Uczniowie.Id = Osoby.Id
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+	ORDER BY [Nazwa klasy] DESC OFFSET 0 ROWS
+```
+```sql
+CREATE VIEW [Wypisz Nauczycieli] AS
+	SELECT Osoby.Id, Imie, Nazwisko, Nauczyciele.Przedmiot, Pracownicy.Pensja, 
+		Pracownicy.Etat, Pracownicy.[Numer telefonu] FROM Osoby
+	JOIN Nauczyciele ON Osoby.Id = Nauczyciele.Id
+	JOIN Pracownicy ON Osoby.Id = Pracownicy.Id
+```
+```sql
+CREATE VIEW [Wypisz Uczniow] AS
+	SELECT Osoby.Id, Imie, Nazwisko, Klasy.[Nazwa klasy] FROM Osoby
+	JOIN Uczniowie ON Osoby.Id = Uczniowie.Id
+	JOIN Klasy ON Klasy.Id = Uczniowie.Id_Klasy
+```
+```sql
+CREATE VIEW [Aktualne Zastepstwa] AS
+	SELECT A.Imie AS [Imie Zastepowanego], A.Nazwisko AS [Nazwisko Zastepowanego], B.Imie AS [Imie Zastepujacego], B.Nazwisko AS [Nazwisko Zastepujacego], 
+		Zastepstwa.[Data rozpoczecia], Zastepstwa.[Data zakonczenia], Nauczyciele.Przedmiot FROM Zastepstwa
+	JOIN Zajecia ON Zastepstwa.Id_zajec = Zajecia.Id
+	JOIN Osoby A ON Zajecia.Nauczyciel = A.Id
+	JOIN Osoby B ON Zastepstwa.Id_nauczyciela = B.Id
+	JOIN Nauczyciele ON Zajecia.Nauczyciel = Nauczyciele.Id
+	WHERE [Data zakonczenia] > GETDATE()
 ```
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
