@@ -71,7 +71,22 @@ CREATE VIEW [Liczebnosc klas] AS
     GROUP BY [Nazwa klasy]
     ORDER BY [Nazwa klasy] OFFSET 0 ROWS
 ```
-
+```sql
+CREATE VIEW [Zwyciezcy Konkursow] AS
+	SELECT Id, Imie, Nazwisko FROM Osoby WHERE Id
+	IN (SELECT Id_Ucznia FROM [Wyniki konkursow] WHERE Miejsce = 1)
+```
+```sql
+CREATE VIEW [Suma Wydatkow] AS
+	SELECT SUM(koszt) AS [Suma wydatkow szkoly] FROM Wydatki
+```
+```sql
+CREATE VIEW [Zarządy Klas] AS
+	SELECT Osoby.Id, Imie, Nazwisko, [Zarzad klas].Funkcja, Klasy.[Nazwa klasy] FROM Osoby 
+	JOIN [Zarzad klas] ON Osoby.Id = [Zarzad klas].Id_ucznia
+	JOIN Uczniowie ON Uczniowie.Id = Osoby.Id
+	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+```
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
 ```sql
@@ -79,10 +94,10 @@ GO
 CREATE PROC uczniowie_na_litere
 (@litera CHAR)
 AS
-SELECT Imie, Nazwisko FROM Uczniowie
-JOIN Osoby ON Uczniowie.Id = Osoby.Id
-WHERE Nazwisko LIKE @litera + '%'
-ORDER BY Imie
+	SELECT Imie, Nazwisko FROM Uczniowie
+	JOIN Osoby ON Uczniowie.Id = Osoby.Id
+	WHERE Nazwisko LIKE @litera + '%'
+	ORDER BY Imie
 GO
 ```
 ```sql
@@ -90,10 +105,10 @@ GO
 CREATE PROC srednia_w_klasie
 @klasa NVARCHAR(6)
 AS
-SELECT AVG(Ocena) AS Srednia FROM Oceny
-JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
-JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
-WHERE [Nazwa klasy] = @klasa
+	SELECT AVG(Ocena) AS Srednia FROM Oceny
+	JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
+	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+	WHERE [Nazwa klasy] = @klasa
 GO
 ```
 ```sql
@@ -102,10 +117,10 @@ CREATE PROC srednia_ucznia
 @imie NVARCHAR(50),
 @nazwisko NVARCHAR(50)
 AS
-SELECT AVG(Ocena) AS Srednia FROM Oceny
-JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
-JOIN Osoby ON Uczniowie.Id = Osoby.Id
-WHERE Imie = @imie AND Nazwisko = @nazwisko
+	SELECT AVG(Ocena) AS Srednia FROM Oceny
+	JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
+	JOIN Osoby ON Uczniowie.Id = Osoby.Id
+	WHERE Imie = @imie AND Nazwisko = @nazwisko
 GO
 ```
 # Wyzwalacze
@@ -118,7 +133,6 @@ ON Klasy
 AFTER INSERT, UPDATE
 AS
 	UPDATE Klasy SET [Nazwa klasy] = CONCAT(Rok, [Skrot kierunku], Kod)
-
 GO
 ```
 ```sql

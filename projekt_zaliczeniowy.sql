@@ -559,9 +559,17 @@ CREATE VIEW [Spis klas] AS
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
 	ORDER BY [Nazwa klasy], Nazwisko, Imie OFFSET 0 ROWS
 GO
+
 CREATE VIEW [Najlepsi Stypendysci] AS
     SELECT Id_ucznia, SUM([Wysokosc stypendium]) AS [Wysokosc Stypendium] FROM Stypendia 
     GROUP BY Id_ucznia ORDER BY [Wysokosc stypendium] DESC OFFSET 0 ROWS
+GO
+
+CREATE VIEW [Liczebnosc klas] AS
+    SELECT [Nazwa klasy], COUNT(*) AS [Liczba osob] FROM Uczniowie
+    JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+    GROUP BY [Nazwa klasy]
+    ORDER BY [Nazwa klasy] OFFSET 0 ROWS
 
 -- procedury
 GO
