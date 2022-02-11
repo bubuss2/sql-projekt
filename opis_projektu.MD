@@ -50,23 +50,26 @@ W schemacie bazy danych znajdują się wszystkie tabele i ich dane, typy tych da
 - Zastepstwa
 
 # Widoki
-Utworzone widoki pozwalają na pokazanie najczęściej według nas wybieranych danych. Nazwy widoków utworzone są tak aby było jasne co one wyświetlają
+Utworzone widoki pozwalają na pokazanie najczęściej według nas wybieranych danych. Nazwy widoków utworzone są tak aby było jasne co one wyświetlają	
 
 ```sql
-GO
 CREATE VIEW [Spis klas] AS
 	SELECT [Nazwa klasy], Nazwisko, Imie FROM Osoby
 	JOIN Uczniowie ON Osoby.Id = Uczniowie.Id
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
 	ORDER BY [Nazwa klasy], Nazwisko, Imie OFFSET 0 ROWS
-GO
 ```
 ```sql
-GO
 CREATE VIEW [Najlepsi Stypendysci] AS
     SELECT Id_ucznia, SUM([Wysokosc stypendium]) AS [Wysokosc Stypendium] FROM Stypendia 
     GROUP BY Id_ucznia ORDER BY [Wysokosc stypendium] DESC OFFSET 0 ROWS
-GO
+```
+```sql
+CREATE VIEW [Liczebnosc klas] AS
+    SELECT [Nazwa klasy], COUNT(*) AS [Liczba osob] FROM Uczniowie
+    JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+    GROUP BY [Nazwa klasy]
+    ORDER BY [Nazwa klasy] OFFSET 0 ROWS
 ```
 
 # Procedury Składowane
