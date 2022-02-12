@@ -60,13 +60,13 @@ CREATE VIEW [Spis klas] AS
 	ORDER BY [Nazwa klasy], Nazwisko, Imie OFFSET 0 ROWS
 ```
 
-```sql
+```tsql
 CREATE VIEW [Najlepsi Stypendysci] AS
     SELECT Id_ucznia, SUM([Wysokosc stypendium]) AS [Wysokosc Stypendium] FROM Stypendia 
     GROUP BY Id_ucznia ORDER BY [Wysokosc stypendium] DESC OFFSET 0 ROWS
 ```
 
-```sql
+```tsql
 CREATE VIEW [Liczebnosc klas] AS
     SELECT [Nazwa klasy], COUNT(*) AS [Liczba osob] FROM Uczniowie
     JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
@@ -74,18 +74,18 @@ CREATE VIEW [Liczebnosc klas] AS
     ORDER BY [Nazwa klasy] OFFSET 0 ROWS
 ```
 
-```sql
+```tsql
 CREATE VIEW [Zwyciezcy Konkursow] AS
 	SELECT Id, Imie, Nazwisko FROM Osoby WHERE Id
 	IN (SELECT Id_Ucznia FROM [Wyniki konkursow] WHERE Miejsce = 1)
 ```
 
-```sql
+```tsql
 CREATE VIEW [Suma Wydatkow] AS
 	SELECT SUM(koszt) AS [Suma wydatkow szkoly] FROM Wydatki
 ```
 
-```sql
+```tsql
 CREATE VIEW [Zarządy Klas] AS
 	SELECT Osoby.Id, Imie, Nazwisko, [Zarzad klas].Funkcja, Klasy.[Nazwa klasy] FROM Osoby 
 	JOIN [Zarzad klas] ON Osoby.Id = [Zarzad klas].Id_ucznia
@@ -94,7 +94,7 @@ CREATE VIEW [Zarządy Klas] AS
 	ORDER BY [Nazwa klasy] DESC OFFSET 0 ROWS
 ```
 
-```sql
+```tsql
 CREATE VIEW [Wypisz Nauczycieli] AS
 	SELECT Osoby.Id, Imie, Nazwisko, Nauczyciele.Przedmiot, Pracownicy.Pensja, 
 		Pracownicy.Etat, Pracownicy.[Numer telefonu] FROM Osoby
@@ -102,14 +102,14 @@ CREATE VIEW [Wypisz Nauczycieli] AS
 	JOIN Pracownicy ON Osoby.Id = Pracownicy.Id
 ```
 
-```sql
+```tsql
 CREATE VIEW [Wypisz Uczniow] AS
 	SELECT Osoby.Id, Imie, Nazwisko, Klasy.[Nazwa klasy] FROM Osoby
 	JOIN Uczniowie ON Osoby.Id = Uczniowie.Id
 	JOIN Klasy ON Klasy.Id = Uczniowie.Id_Klasy
 ```
 
-```sql
+```tsql
 CREATE VIEW [Aktualne Zastepstwa] AS
 	SELECT A.Imie AS [Imie Zastepowanego], A.Nazwisko AS [Nazwisko Zastepowanego], B.Imie AS [Imie Zastepujacego], B.Nazwisko AS [Nazwisko Zastepujacego], 
 		Zastepstwa.[Data rozpoczecia], Zastepstwa.[Data zakonczenia], Nauczyciele.Przedmiot FROM Zastepstwa
@@ -120,7 +120,7 @@ CREATE VIEW [Aktualne Zastepstwa] AS
 	WHERE [Data zakonczenia] > GETDATE()
 ```
 
-```sql
+```tsql
 CREATE VIEW [Ilosc czlonkow kol] AS
     SELECT [Kola naukowe].Nazwa, Count(Id_ucznia) AS [Ilosc czlonkow] FROM [Czlonkowie kol]
     JOIN [Kola naukowe] ON [Czlonkowie kol].[Nazwa_kola] = [Kola naukowe].Nazwa
@@ -130,7 +130,7 @@ CREATE VIEW [Ilosc czlonkow kol] AS
 
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
-```sql
+```tsql
 GO
 CREATE PROC uczniowie_na_litere
 (@litera CHAR)
@@ -141,7 +141,7 @@ AS
 	ORDER BY Imie
 GO
 ```
-```sql
+```tsql
 GO
 CREATE PROC srednia_w_klasie
 @klasa NVARCHAR(6)
@@ -153,7 +153,7 @@ AS
 	WHERE [Nazwa klasy] = @klasa
 GO
 ```
-```sql
+```tsql
 GO
 CREATE PROC srednia_ucznia
 @imie NVARCHAR(50),
@@ -166,7 +166,7 @@ AS
 GO
 ```
 
-```sql
+```tsql
 GO
 CREATE PROC liczba_dni_wolnych
 @dni_wolne INT OUTPUT
@@ -175,7 +175,7 @@ AS
 GO
 ```
 
-```sql
+```tsql
 GO
 CREATE PROC podzial_plci
 AS
@@ -185,7 +185,7 @@ GROUP BY Plec
 GO
 ```
 ## Wykonywanie Procedur
-```sql
+```tsql
 GO
 EXEC uczniowie_na_litere 'D'
 
@@ -215,7 +215,7 @@ EXEC podzial_plci
 # Wyzwalacze
 Wyzwalacze w bazie są bardzo proste, np. dodawanie stypendium powoduje automatyczne zwiększenie kwoty wydatków na stypendia w tabeli wydatków, tak aby zautomatyzować aktualizację innych tabel. Lub aktualizowanie nazw sal czy klas według określonego schematu.
 
-```sql
+```tsql
 GO
 CREATE TRIGGER nazwy_klas
 ON Klasy
@@ -224,7 +224,7 @@ AS
 	UPDATE Klasy SET [Nazwa klasy] = CONCAT(Rok, [Skrot kierunku], Kod)
 GO
 ```
-```sql
+```tsql
 GO
 CREATE TRIGGER nazwy_sal
 ON Sale
@@ -233,7 +233,7 @@ AS
 	UPDATE Sale SET [Nazwa sali] = CONCAT(Pietro, [Numer sali])
 GO
 ```
-```sql
+```tsql
 GO
 CREATE TRIGGER Dodaj_Wydatek_Stypendiow
 ON Stypendia
@@ -243,7 +243,7 @@ AS
     WHERE Nazwa IN ('Stypendia')
 GO
 ```
-```sql
+```tsql
 GO
 CREATE TRIGGER Odejmij_Wydatek_Stypendium
 ON Stypendia
@@ -254,7 +254,7 @@ AS
     DELETE FROM Stypendia WHERE Stypendia.Id IN (SELECT Id FROM deleted)
 GO
 ```
-```sql
+```tsql
 GO
 CREATE TRIGGER Dodaj_Wydatek_Pracownik
 ON Pracownicy
@@ -270,7 +270,7 @@ Skrypt tworzący baze tworzy wyżej wymienione tabelę, wyzwalacze, procedury sk
 Następnie wstawiane są przykładowe rekordy, które oczywiście można usunąć gdyż są one opcjonalne.
 Pominięto na końcu tworzenie widoków, wyzwalaczy i procedur składowanych, gdyż jest to po prostu ten sam kod który został pokazany wcześniej. w przypadku opisów wyżej wymienionych punktów.
 
-```sql
+```tsql
 -- Usun poprzednia baze jesli istnieje o tej nazwie
 IF EXISTS(select * from sys.databases where name='SzkolaDatabase')
 	DROP DATABASE SzkolaDatabase
@@ -278,7 +278,7 @@ IF EXISTS(select * from sys.databases where name='SzkolaDatabase')
 CREATE DATABASE SzkolaDatabase
 ```
 
-```sql
+```tsql
 -- tworzenie tabel
 USE SzkolaDatabase
 
