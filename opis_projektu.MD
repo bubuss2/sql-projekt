@@ -398,7 +398,7 @@ CREATE TABLE Wspolpraca (
 )
 
 CREATE TABLE Urlopy (
-	Id_pracownika INT REFERENCES Pracownicy PRIMARY KEY,
+	Id_pracownika INT REFERENCES Pracownicy,
 	[Data rozpoczecia] DATE NOT NULL,
 	[Data zakonczenia] DATE NOT NULL,
 	PRIMARY KEY (Id_pracownika, [Data rozpoczecia]),
