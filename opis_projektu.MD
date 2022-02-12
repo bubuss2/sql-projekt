@@ -145,6 +145,7 @@ GO
 GO
 CREATE PROC srednia_w_klasie
 @klasa NVARCHAR(6)
+@srednia_klasy DECIMAL(18,3) OUTPUT
 AS
 	SELECT @srednia_klasy = AVG(Ocena) FROM Oceny
 	JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
