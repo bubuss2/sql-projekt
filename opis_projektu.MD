@@ -401,6 +401,7 @@ CREATE TABLE Urlopy (
 	Id_pracownika INT REFERENCES Pracownicy PRIMARY KEY,
 	[Data rozpoczecia] DATE NOT NULL,
 	[Data zakonczenia] DATE NOT NULL,
+	PRIMARY KEY (Id_pracownika, [Data rozpoczecia]),
 )
 
 CREATE TABLE Zastepstwa (
