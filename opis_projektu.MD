@@ -59,11 +59,13 @@ CREATE VIEW [Spis klas] AS
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
 	ORDER BY [Nazwa klasy], Nazwisko, Imie OFFSET 0 ROWS
 ```
+
 ```sql
 CREATE VIEW [Najlepsi Stypendysci] AS
     SELECT Id_ucznia, SUM([Wysokosc stypendium]) AS [Wysokosc Stypendium] FROM Stypendia 
     GROUP BY Id_ucznia ORDER BY [Wysokosc stypendium] DESC OFFSET 0 ROWS
 ```
+
 ```sql
 CREATE VIEW [Liczebnosc klas] AS
     SELECT [Nazwa klasy], COUNT(*) AS [Liczba osob] FROM Uczniowie
@@ -71,15 +73,18 @@ CREATE VIEW [Liczebnosc klas] AS
     GROUP BY [Nazwa klasy]
     ORDER BY [Nazwa klasy] OFFSET 0 ROWS
 ```
+
 ```sql
 CREATE VIEW [Zwyciezcy Konkursow] AS
 	SELECT Id, Imie, Nazwisko FROM Osoby WHERE Id
 	IN (SELECT Id_Ucznia FROM [Wyniki konkursow] WHERE Miejsce = 1)
 ```
+
 ```sql
 CREATE VIEW [Suma Wydatkow] AS
 	SELECT SUM(koszt) AS [Suma wydatkow szkoly] FROM Wydatki
 ```
+
 ```sql
 CREATE VIEW [Zarządy Klas] AS
 	SELECT Osoby.Id, Imie, Nazwisko, [Zarzad klas].Funkcja, Klasy.[Nazwa klasy] FROM Osoby 
@@ -88,6 +93,7 @@ CREATE VIEW [Zarządy Klas] AS
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
 	ORDER BY [Nazwa klasy] DESC OFFSET 0 ROWS
 ```
+
 ```sql
 CREATE VIEW [Wypisz Nauczycieli] AS
 	SELECT Osoby.Id, Imie, Nazwisko, Nauczyciele.Przedmiot, Pracownicy.Pensja, 
@@ -95,12 +101,14 @@ CREATE VIEW [Wypisz Nauczycieli] AS
 	JOIN Nauczyciele ON Osoby.Id = Nauczyciele.Id
 	JOIN Pracownicy ON Osoby.Id = Pracownicy.Id
 ```
+
 ```sql
 CREATE VIEW [Wypisz Uczniow] AS
 	SELECT Osoby.Id, Imie, Nazwisko, Klasy.[Nazwa klasy] FROM Osoby
 	JOIN Uczniowie ON Osoby.Id = Uczniowie.Id
 	JOIN Klasy ON Klasy.Id = Uczniowie.Id_Klasy
 ```
+
 ```sql
 CREATE VIEW [Aktualne Zastepstwa] AS
 	SELECT A.Imie AS [Imie Zastepowanego], A.Nazwisko AS [Nazwisko Zastepowanego], B.Imie AS [Imie Zastepujacego], B.Nazwisko AS [Nazwisko Zastepujacego], 
@@ -111,6 +119,7 @@ CREATE VIEW [Aktualne Zastepstwa] AS
 	JOIN Nauczyciele ON Zajecia.Nauczyciel = Nauczyciele.Id
 	WHERE [Data zakonczenia] > GETDATE()
 ```
+
 ```sql
 CREATE VIEW [Ilosc czlonkow kol] AS
     SELECT [Kola naukowe].Nazwa, Count(Id_ucznia) AS [Ilosc czlonkow] FROM [Czlonkowie kol]
@@ -118,6 +127,7 @@ CREATE VIEW [Ilosc czlonkow kol] AS
     GROUP BY [Kola naukowe].Nazwa
     ORDER BY [Ilosc czlonkow] DESC OFFSET 0 ROWS
 ```
+
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
 ```sql
@@ -136,7 +146,7 @@ GO
 CREATE PROC srednia_w_klasie
 @klasa NVARCHAR(6)
 AS
-	SELECT AVG(Ocena) AS Srednia FROM Oceny
+	SELECT @srednia_klasy = AVG(Ocena) FROM Oceny
 	JOIN Uczniowie ON Oceny.Id_ucznia = Uczniowie.Id
 	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
 	WHERE [Nazwa klasy] = @klasa
@@ -154,6 +164,53 @@ AS
 	WHERE Imie = @imie AND Nazwisko = @nazwisko
 GO
 ```
+
+```sql
+GO
+CREATE PROC liczba_dni_wolnych
+@dni_wolne INT OUTPUT
+AS
+	SELECT @dni_wolne = COUNT(*) FROM [Dni wolne]
+GO
+```
+
+```sql
+GO
+CREATE PROC podzial_plci
+AS
+	SELECT Plec, COUNT(*), CAST(100 * COUNT(*) / (SELECT COUNT(*) FROM Uczniowie) AS NVARCHAR) + '%' AS [Podzial procentowy] FROM Uczniowie
+	JOIN Osoby ON Uczniowie.Id = Osoby.Id
+GROUP BY Plec
+GO
+```
+## Wykonywanie Procedur
+```sql
+GO
+EXEC uczniowie_na_litere 'D'
+
+DECLARE @klasa NVARCHAR(6) = '3BCa';
+DECLARE @srednia DECIMAL(18,3);
+EXEC srednia_w_klasie @klasa, @srednia OUTPUT
+
+SELECT @srednia AS 'Srednia klasy'
+SELECT Imie, Nazwisko, AVG(Ocena) AS Srednia FROM Uczniowie
+JOIN Osoby ON Uczniowie.Id = Osoby.Id
+JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+JOIN Oceny ON Uczniowie.Id = Oceny.Id_ucznia
+WHERE [Nazwa klasy] = @klasa
+GROUP BY Imie, Nazwisko
+HAVING AVG(Ocena) > @srednia
+ORDER BY Srednia
+
+EXEC srednia_ucznia 'Cygan', 'Dziewięć'
+
+DECLARE @liczba_dni INT;
+EXEC liczba_dni_wolnych @liczba_dni OUTPUT
+PRINT 'Liczba dni wolnych w roku: ' + CAST(@liczba_dni AS NVARCHAR)
+
+EXEC podzial_plci
+```
+
 # Wyzwalacze
 Wyzwalacze w bazie są bardzo proste, np. dodawanie stypendium powoduje automatyczne zwiększenie kwoty wydatków na stypendia w tabeli wydatków, tak aby zautomatyzować aktualizację innych tabel. Lub aktualizowanie nazw sal czy klas według określonego schematu.
 
