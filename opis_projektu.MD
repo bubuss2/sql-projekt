@@ -52,7 +52,7 @@ W schemacie bazy danych znajdują się wszystkie tabele i ich dane, typy tych da
 # Widoki
 Utworzone widoki pozwalają na pokazanie najczęściej według nas wybieranych danych. Nazwy widoków utworzone są tak aby było jasne co one wyświetlają	
 
-```sql
+```tsql
 CREATE VIEW [Spis klas] AS
 	SELECT [Nazwa klasy], Nazwisko, Imie FROM Osoby
 	JOIN Uczniowie ON Osoby.Id = Uczniowie.Id
