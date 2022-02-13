@@ -367,7 +367,8 @@ CREATE TABLE Osoby (
 CREATE TABLE Uczniowie (
 	Id INT REFERENCES Osoby PRIMARY KEY,
 	Id_Klasy INT REFERENCES Klasy ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
-	[Numer telefonu opiekuna] NVARCHAR(10)
+	[Numer telefonu opiekuna] NVARCHAR(10),
+	CHECK ([Numer telefonu opiekuna] NOT LIKE '%[^0-9]%'),
 )
 
 CREATE TABLE [Zarzad klas] (
@@ -397,15 +398,16 @@ CREATE TABLE Administracja (
 	[Nazwa stanowiska] NVARCHAR(50) NOT NULL,
 	[Numer wewnetrzny] INT,
 	[Adres email] NVARCHAR(100),
+	CHECK ([Adres email] LIKE '%[@]%'),
 )
 
 CREATE TABLE Oceny (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
 	Id_ucznia INT REFERENCES Uczniowie NOT NULL,
 	Id_nauczyciela INT REFERENCES Nauczyciele NOT NULL,
-	Ocena FLOAT,
+	Ocena FLOAT NOT NULL,
 	Komentarz NVARCHAR(3000),
-	Data DATE,
+	Data DATE NOT NULL,
 )
 
 CREATE TABLE Sale (
@@ -426,31 +428,31 @@ CREATE TABLE [Godziny lekcyjne] (
 CREATE TABLE Zajecia (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
 	Dzien NVARCHAR(20) NOT NULL,
-	[Godzina lekcyjna] INT REFERENCES [Godziny lekcyjne],
-	Klasa INT REFERENCES Klasy,
+	CHECK (Dzien IN ('Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek')),
+	[Godzina lekcyjna] INT REFERENCES [Godziny lekcyjne] NOT NULL,
+	Klasa INT REFERENCES Klasy NOT NULL,
 	Nauczyciel INT REFERENCES Nauczyciele NOT NULL,
-	[Numer sali] NVARCHAR(30),
-	Pietro INT,
+	[Numer sali] NVARCHAR(30) NOT NULL,
+	Pietro INT NOT NULL,
 	FOREIGN KEY ([Numer sali], Pietro) REFERENCES Sale ([Numer sali], Pietro),
 )
 
 CREATE TABLE [Kola naukowe] (
 	Nazwa NVARCHAR(100) PRIMARY KEY,
-	[Liczba czlonkow] INT,
 	[Rok zalozenia] INT,
 	Opiekun INT REFERENCES Nauczyciele,
 )
 
 CREATE TABLE [Czlonkowie kol] (
-	Id_ucznia INT REFERENCES Uczniowie,
-	Nazwa_kola NVARCHAR(100) REFERENCES [Kola naukowe],
+	Id_ucznia INT REFERENCES Uczniowie NOT NULL,
+	Nazwa_kola NVARCHAR(100) REFERENCES [Kola naukowe] NOT NULL,
 	Aktywny BIT NOT NULL,
 	PRIMARY KEY (Id_ucznia, Nazwa_kola),
 )
 
 CREATE TABLE Wspolpraca (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	[Nazwa podmiotu] NVARCHAR(100),
+	[Nazwa podmiotu] NVARCHAR(100) NOT NULL,
 	Adres NVARCHAR(1000),
 )
 
@@ -463,8 +465,8 @@ CREATE TABLE Urlopy (
 
 CREATE TABLE Zastepstwa (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Id_zajec INT REFERENCES Zajecia,
-	Id_nauczyciela INT REFERENCES Nauczyciele,
+	Id_zajec INT REFERENCES Zajecia NOT NULL,
+	Id_nauczyciela INT REFERENCES Nauczyciele NOT NULL,
 	[Data rozpoczecia] DATE NOT NULL,
 	[Data zakonczenia] DATE NOT NULL,
 )
@@ -475,47 +477,47 @@ CREATE TABLE [Dni wolne] (
 
 CREATE TABLE [Wynajem sal] (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	[Godzina rozpoczecia] DATETIME,
-	[Godzina zakonczenia] DATETIME,
-	Koszt MONEY,
-	[Numer sali] NVARCHAR(30),
-	Pietro INT,
+	[Godzina rozpoczecia] DATETIME NOT NULL,
+	[Godzina zakonczenia] DATETIME NOT NULL,
+	Koszt MONEY NOT NULL,
+	[Numer sali] NVARCHAR(30) NOT NULL,
+	Pietro INT NOT NULL,
 	FOREIGN KEY ([Numer sali], Pietro) REFERENCES Sale ([Numer sali], Pietro),
 )
 
 CREATE TABLE Konkursy (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Nazwa NVARCHAR(100),
+	Nazwa NVARCHAR(100) NOT NULL,
 	Opiekun INT REFERENCES Nauczyciele,
 )
 
 CREATE TABLE [Wyniki konkursow] (
 	Id_konkursu INT REFERENCES Konkursy,
 	Id_ucznia INT REFERENCES Uczniowie,
-	Miejsce INT,
+	Miejsce INT NOT NULL,
 	PRIMARY KEY (Id_konkursu, Id_ucznia),
 )
 
 CREATE TABLE Sprzet (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Nazwa NVARCHAR(100),
-	[Liczba sztuk] INT,
-	[Numer sali] NVARCHAR(30),
-	Pietro INT,
+	Nazwa NVARCHAR(100) NOT NULL,
+	[Liczba sztuk] INT NOT NULL,
+	[Numer sali] NVARCHAR(30) NOT NULL,
+	Pietro INT NOT NULL,
 	FOREIGN KEY ([Numer sali], Pietro) REFERENCES Sale ([Numer sali], Pietro),
 )
 
 CREATE TABLE Wydatki (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Nazwa NVARCHAR(100),
-	Koszt MONEY,
+	Nazwa NVARCHAR(100) NOT NULL,
+	Koszt MONEY NOT NULL,
 )
 
 CREATE TABLE Stypendia (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	[Nazwa stypendium] NVARCHAR(100),
-	Id_ucznia INT REFERENCES Uczniowie,
-	[Wysokosc stypendium] MONEY,
+	[Nazwa stypendium] NVARCHAR(100) NOT NULL,
+	Id_ucznia INT REFERENCES Uczniowie NOT NULL,
+	[Wysokosc stypendium] MONEY NOT NULL,
 )
 ```
 
