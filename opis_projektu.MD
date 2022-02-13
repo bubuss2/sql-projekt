@@ -128,6 +128,63 @@ CREATE VIEW [Ilosc czlonkow kol] AS
     ORDER BY [Ilosc czlonkow] DESC OFFSET 0 ROWS
 ```
 
+```tsql
+CREATE VIEW [Najlepsi uczniowie] AS
+	SELECT [Nazwa klasy], Imie, Nazwisko, AVG(Ocena) AS Srednia FROM Uczniowie
+	JOIN Klasy ON Uczniowie.Id_Klasy = Klasy.Id
+	JOIN Oceny ON Uczniowie.Id = Oceny.Id_ucznia
+	JOIN Osoby ON Uczniowie.Id = Osoby.Id
+	GROUP BY [Nazwa klasy], Imie, Nazwisko
+	ORDER BY AVG(Ocena) DESC OFFSET 0 ROWS
+```
+
+# Funkcje
+Funkcje służą nam za sparametryzowane widoki, w których możemy podać argumenty aby np. zawęzić obszar wypisywanych później danych.
+```tsql
+CREATE FUNCTION plan_zajec_klasy (@dzien NVARCHAR(20), @klasa NVARCHAR(6))
+RETURNS @harmonogram TABLE
+(
+	[Przedział godzin] NVARCHAR(100),
+	Przedmiot NVARCHAR(50),
+	Nauczyciel NVARCHAR(300),
+	Sala NVARCHAR(10)
+)
+AS
+BEGIN
+	IF @dzien NOT IN ('Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek')
+	BEGIN
+		INSERT INTO @harmonogram VALUES ('Taki', 'dzień', 'nie', 'istnieje')
+	END
+	ELSE
+	IF @klasa NOT IN (SELECT [Nazwa klasy] FROM Klasy)
+	BEGIN
+		INSERT INTO @harmonogram VALUES ('Taka', 'klasa', 'nie', 'istnieje')
+	END
+	ELSE
+	BEGIN
+	INSERT INTO @harmonogram 
+		SELECT
+			CONCAT(CAST([Godziny lekcyjne].[Godzina rozpoczecia] AS TIME(0)) , ' - ', CAST([Godziny lekcyjne].[Godzina zakonczenia] AS TIME(0))),
+			Nauczyciele.Przedmiot,
+			CONCAT(Osoby.Imie, ' ', Osoby.Nazwisko),
+			Sale.[Nazwa sali]
+		FROM Zajecia
+		JOIN Klasy ON Zajecia.Klasa = Klasy.Id
+		JOIN [Godziny lekcyjne] ON Zajecia.[Godzina lekcyjna] = [Godziny lekcyjne].Lp
+		JOIN Nauczyciele ON Zajecia.Nauczyciel = Nauczyciele.Id
+		JOIN Osoby ON Zajecia.Nauczyciel = Osoby.Id
+		JOIN Sale ON Zajecia.[Numer sali] = Sale.[Numer sali] AND Zajecia.Pietro = Sale.Pietro
+		WHERE Dzien = @dzien AND Klasy.[Nazwa klasy] = @klasa
+	END
+	RETURN
+END
+```
+
+## Użycie funkcji
+```tsql
+SELECT * FROM plan_zajec_klasy('Poniedziałek', '1MFa')
+```
+
 # Procedury Składowane
 Procedury składowane w naszej bazie pozwalają np. na wypisanie uczniów na zadaną przez użytkownika literę, czy wypisanie średniej ocen jakieś określonej klasy.
 ```tsql
